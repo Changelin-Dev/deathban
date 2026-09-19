@@ -92,7 +92,7 @@ banreason: "<bold><red>BANNED!</red></bold>\n<yellow>Reason: <gray>Died in comba
 - ✅ Chat announcement + sound when a ban is triggered, using the native death message
 - ✅ Live countdown in the ban message (recalculated on every login attempt, not a static string)
 
-### Version 1.3.0
+### Version 1.3.0 (https://github.com/jqshuv/deathban/releases/tag/v1.3.0)
 - ✅ Folia Support
 - ✅ Player-Kill-Only Mode
 - ✅ Better Ban Messages (Adventure API)
