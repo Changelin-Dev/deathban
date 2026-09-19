@@ -1,6 +1,7 @@
 package com.jqshuv.deathban;
 
 import com.jqshuv.deathban.listeners.DeathListener;
+import com.jqshuv.deathban.listeners.JoinAttemptListener;
 import com.jqshuv.deathban.utils.Scheduler;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -28,6 +29,7 @@ public final class DeathBan extends JavaPlugin {
             getLogger().info("Folia/Paper not detected. Using standard Bukkit scheduler.");
         }
         this.getServer().getPluginManager().registerEvents(new DeathListener(), this);
+        this.getServer().getPluginManager().registerEvents(new JoinAttemptListener(), this);
     }
 
     public FileConfiguration getCustomConfig() {

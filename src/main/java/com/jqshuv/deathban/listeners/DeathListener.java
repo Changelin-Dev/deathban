@@ -2,8 +2,11 @@ package com.jqshuv.deathban.listeners;
 
 import com.jqshuv.deathban.DeathBan;
 import com.jqshuv.deathban.utils.Scheduler;
+import com.jqshuv.deathban.utils.TimeUtils;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Sound;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -93,6 +96,9 @@ public class DeathListener implements Listener {
             String banReason = fl.getString("settings.banreason");
             DeathBan.debug("Ban reason: " + banReason);
 
+            // Annonce dans le tchat + son de tonnerre
+            announceUpcomingBan(p, fl, tillBan);
+
             // Store the pending ban - it will be executed when player respawns
             long scheduledTime = System.currentTimeMillis() + (tillBan * 1000L);
             DeathBan.debug("Scheduling ban execution for: " + new Date(scheduledTime));
@@ -149,6 +155,37 @@ public class DeathListener implements Listener {
         DeathBan.debug("=== End Player Respawn Event ===");
     }
 
+    private void announceUpcomingBan(Player p, FileConfiguration fl, int tillBan) {
+        boolean enabled = fl.getBoolean("settings.chat-announcement.enabled", true);
+        if (!enabled) return;
+
+        String template = fl.getString(
+                "settings.chat-announcement.message",
+                "<dark_gray>⚡ <bold><red>{player}</red></bold> a été frappé par la foudre du bannissement !</dark_gray>"
+        );
+        String formatted = template
+                .replace("{player}", p.getName())
+                .replace("{delay}", String.valueOf(tillBan));
+
+        Component message = DeathBan.getMiniMessage().deserialize(formatted);
+        Bukkit.getServer().sendMessage(message);
+        DeathBan.debug("Chat announcement broadcasted for " + p.getName());
+
+        String soundName = fl.getString("settings.chat-announcement.sound", "ENTITY_LIGHTNING_BOLT_THUNDER");
+        float volume = (float) fl.getDouble("settings.chat-announcement.sound-volume", 1.0);
+        float pitch = (float) fl.getDouble("settings.chat-announcement.sound-pitch", 1.0);
+
+        try {
+            Sound sound = Sound.valueOf(soundName);
+            for (Player online : Bukkit.getOnlinePlayers()) {
+                online.playSound(online.getLocation(), sound, volume, pitch);
+            }
+            DeathBan.debug("Thunder sound played: " + soundName);
+        } catch (IllegalArgumentException ex) {
+            DeathBan.getInstance().getLogger().warning("Son invalide dans la config (settings.chat-announcement.sound): " + soundName);
+        }
+    }
+
     private void executeBan(Player p, PendingBan ban) {
         DeathBan.debug("=== Execute Ban ===");
         DeathBan.debug("Player: " + p.getName());
@@ -189,17 +226,26 @@ public class DeathListener implements Listener {
             // Use plain text reason for ban storage to avoid Adventure/Legacy conflicts
             String plainReason = "You are banned from this server.";
 
+            // Message dynamique : {time} est remplacé par la durée réelle restante
+            FileConfiguration fl = DeathBan.getInstance().getCustomConfig();
+            String timeText = ban.banExpiry != null
+                    ? TimeUtils.formatDuration(ban.banExpiry.getTime() - System.currentTimeMillis())
+                    : fl.getString("settings.permanent-label", "Permanent");
+            String dynamicReason = ban.banReason
+                    .replace("{time}", timeText)
+                    .replace("{player}", p.getName());
+
             if (ban.doIpBan) {
                 String ipAddress = p.getAddress().getAddress().getHostAddress();
                 DeathBan.debug("Adding IP ban for: " + ipAddress);
                 Bukkit.getBanList(org.bukkit.BanList.Type.IP).addBan(ipAddress, plainReason, ban.banExpiry, "console");
                 DeathBan.debug("IP ban added, kicking player");
-                Scheduler.kick(p, ban.banReason);
+                Scheduler.kick(p, dynamicReason);
             } else {
                 DeathBan.debug("Adding name ban for: " + p.getName());
                 Bukkit.getBanList(org.bukkit.BanList.Type.NAME).addBan(p.getName(), plainReason, ban.banExpiry, "console");
                 DeathBan.debug("Name ban added, kicking player");
-                Scheduler.kick(p, ban.banReason);
+                Scheduler.kick(p, dynamicReason);
             }
 
             DeathBan.debug("Ban execution completed");

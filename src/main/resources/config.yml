@@ -1,5 +1,7 @@
 settings:
-  banreason: "<bold><red>Game Over!</red></bold>\n\n<gray>You were banned for dying in combat.\n\nBan Duration: <yellow>30 minutes</yellow>\nBan Type: <aqua>Deathban</aqua></gray>"
+  # Message de ban. {time} est remplacé par la durée restante réelle
+  # (ex: "29m 58s"), {player} par le nom du joueur.
+  banreason: "<bold><red>Game Over!</red></bold>\n\n<gray>You were banned for dying in combat.\n\nBan Duration: <yellow>{time}</yellow>\nBan Type: <aqua>Deathban</aqua></gray>"
   ban-delay: 3
   spectator-after-death: true
   ban-time: 30
@@ -7,3 +9,19 @@ settings:
   ignore-permission: false
   player-kill-only: false
   debug: false
+
+  # Libellé utilisé quand ban-time = 0 (ban permanent), partout où {time} apparaît
+  permanent-label: "Permanent"
+
+  # Annonce dans le tchat + son de tonnerre au moment de la mort (avant le ban effectif)
+  chat-announcement:
+    enabled: true
+    # {player} = nom du joueur, {delay} = secondes avant le ban (settings.ban-delay)
+    message: "<dark_gray>⚡ <bold><red>{player}</red></bold> a été frappé par la foudre et sera banni dans {delay}s !</dark_gray>"
+    sound: "ENTITY_LIGHTNING_BOLT_THUNDER"
+    sound-volume: 1.0
+    sound-pitch: 1.0
+
+  # Message affiché à CHAQUE tentative de connexion d'un joueur banni,
+  # avec le temps restant recalculé en direct. {time}, {reason}, {player} disponibles.
+  login-ban-message: "<bold><red>Vous êtes banni de ce serveur</red></bold>\n\n<gray>Raison : <yellow>{reason}</yellow>\nTemps restant : <aqua>{time}</aqua></gray>"
