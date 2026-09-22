@@ -16,8 +16,9 @@ settings:
   # Annonce dans le tchat + son de tonnerre au moment de la mort (avant le ban effectif)
   chat-announcement:
     enabled: true
+    # {deathmessage} = message de mort natif de Minecraft (tué par X, mort dans la lave, chute, etc.)
     # {player} = nom du joueur, {delay} = secondes avant le ban (settings.ban-delay)
-    message: "<dark_gray>⚡ <bold><red>{player}</red></bold> a été frappé par la foudre et sera banni dans {delay}s !</dark_gray>"
+    message: "<dark_red><bold>☠</bold> {deathmessage}</dark_red> <gray>— banni dans {delay}s</gray>"
     sound: "ENTITY_LIGHTNING_BOLT_THUNDER"
     sound-volume: 1.0
     sound-pitch: 1.0

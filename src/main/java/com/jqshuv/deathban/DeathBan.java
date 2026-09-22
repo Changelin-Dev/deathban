@@ -22,7 +22,7 @@ public final class DeathBan extends JavaPlugin {
     public void onEnable() {
         INSTANCE = this;
         createCustomConfig();
-        getLogger().info("DeathBan v1.3.0 enabling...");
+        getLogger().info("DeathBan v1.4.1 enabling...");
         if (Scheduler.isFolia()) {
             getLogger().info("Folia/Paper detected! Using Folia scheduler.");
         } else {
